@@ -1,0 +1,8 @@
+知乎日报-WebApp
+  技术栈：create-react-app、React18、redux/react-redux、react-router-dom V6、axios、CSS-IN-JS（styled-components）、sass、AntdMobile
+  
+  修改脚手架的默认配置：
+    + 配置别名@
+    + 配置跨域代理：http-proxy-middleware
+    + 配置REM响应式布局处理：lib-flexible、postcss-pxtorem
+    + 配置打包优化
