@@ -6,3 +6,23 @@
     + 配置跨域代理：http-proxy-middleware
     + 配置REM响应式布局处理：lib-flexible、postcss-pxtorem
     + 配置打包优化
+
+  lib-flexible 设置rem和px换算比例
+    + 根据设备宽度的变换自动计算
+    + html.style.fontSize = 设备的宽度/10+'px'
+    + 750设计稿中，1rem=75px
+    + 375设计稿中，1rem=37.5px
+  
+  postcss-pxtorem 把我们写的px单位，按照当时的换算比例，自动转换为rem，不需要自己算
+    + 假设设计稿还是750，我们测出来多少尺寸，写样式的时候就写多少尺寸，并且不需要手动转换为rem，我们在webpack中，针对postcss-pxtorem做配置，让插件帮我们自动转换。
+
+    const px2rem = require('postcss-pxtorem');
+    px2rem({
+      // 基于lib-flexible，50设计稿，就会设置成1rem=75px，此时在webpack编译中，我们也需要让排序rem插件，按照2rem=75px，把我们测出来的并且编写的px样式，自动转换成rem
+      rootValue: 75,
+      // 对所有文件中的样式生效（AntdMobile组件库中的样式）
+      propList: ['*']
+    })
+
+    + 在入口中，我们导入lib-flexible，确保在不同的设备上，可以等比例的对rem的换算比例进行缩放
+    + 手动设置：超过750px后就不再继续放大
