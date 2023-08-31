@@ -1,8 +1,12 @@
+import './index.scss';
+import { HashRouter } from 'react-router-dom';
+import RouterView from './router';
+
 const App = () => {
   return (
-    <div className='App'>
-      <header className='App-header'>zhihu</header>
-    </div>
+    <HashRouter>
+      <RouterView />
+    </HashRouter>
   );
 };
 
