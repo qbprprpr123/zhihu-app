@@ -60,10 +60,10 @@ const useTailwind = fs.existsSync(path.join(paths.appPath, 'tailwind.config.js')
 const swSrc = paths.swSrc;
 
 // style files regexes
-const cssRegex = /\.(css|js|jsx)$/;
-const cssModuleRegex = /\.module\.(css|js|jsx)$/;
-const sassRegex = /\.(scss|sass|jsx|js)$/;
-const sassModuleRegex = /\.module\.(scss|sass|jsx|js)$/;
+const cssRegex = /\.css$/;
+const cssModuleRegex = /\.module\.css$/;
+const sassRegex = /\.scss|sass$/;
+const sassModuleRegex = /\.module\.scss|sass$/;
 const px2rem = require('postcss-pxtorem');
 const hasJsxRuntime = (() => {
   if (process.env.DISABLE_NEW_JSX_TRANSFORM === 'true') {
