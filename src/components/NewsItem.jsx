@@ -12,6 +12,18 @@ const NewsItemBox = styled.div`
     display: block;
     height: 100%;
     text-decoration: none;
+
+    &:visited {
+      .content {
+        .title {
+          color: #999;
+        }
+
+        .author {
+          color: #aaa;
+        }
+      }
+    }
   }
 
   .adm-image {
@@ -49,6 +61,7 @@ const NewsItemBox = styled.div`
 
     .author {
       line-height: 24px;
+      padding-top: 5px;
       font-size: 24px;
       color: #999;
     }

@@ -37,4 +37,31 @@ Mockjs.mock('/mock/basic/info', 'get', {
   },
 });
 
+Mockjs.mock('/mock/basic/more', () => {
+  return {
+    code: 0,
+    meg: 'success',
+    data: {
+      ...Mockjs.mock({
+        'stories|1': [
+          {
+            id: '@id',
+            date: '@date("yyyyMMdd")',
+            'list|10': [
+              {
+                uid: '@id',
+                title: '@ctitle(10, 17)',
+                name: '@cname',
+                image: 'https://source.unsplash.com/random/200x200?sig=@id',
+              },
+            ],
+          },
+        ],
+      }),
+    },
+  };
+});
+
 export const getHomeBasicInfo = () => request.get('/mock/basic/info');
+
+export const getHomeBasicMoreInfo = () => request.get('/mock/basic/more');

@@ -1,12 +1,12 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import styled from 'styled-components';
 import { Divider, DotLoading, Swiper, Image } from 'antd-mobile';
 import { Link } from 'react-router-dom';
 import { formatTime } from '@/assets/utils';
-import { getHomeBasicInfo } from '@/api/request/home';
+import { getHomeBasicInfo, getHomeBasicMoreInfo } from '@/api/request/home';
 import HomeHead from '../components/HomeHeader';
 import NewsItem from '@/components/NewsItem';
-// import SkeletonAgain from '@/components/SkeletonAgain';
+import SkeletonAgain from '@/components/SkeletonAgain';
 
 const HomeBox = styled.div`
   /* 轮播图 */
@@ -118,21 +118,54 @@ const Home = () => {
   const [today, setToday] = useState(formatTime(null, '{0}{1}{2}'));
   const [bannerData, setBannerData] = useState([]);
   const [newsList, setNewsList] = useState([]); // 0x000
+  const loadMore = useRef();
 
   // 第一次渲染完毕，向服务器发送数据
   useEffect(() => {
     (async () => {
       try {
         const res = await getHomeBasicInfo();
-        const { date, records, stories } = res?.data;
-        console.log(stories);
+        const { date, records, stories } = res?.data || {};
+
         setToday(formatTime(date, '{0}{1}{2}'));
         setBannerData(records);
-        setNewsList([...stories]);
+        // 为什么要执行这一步？
+        newsList.push(...stories);
+        setNewsList([...newsList]);
       } catch (e) {
         return e;
       }
     })();
+  }, []);
+
+  // 第一次渲染完毕：设置监听器，实现触底加载
+  useEffect(() => {
+    let ob = new IntersectionObserver(async (changes) => {
+      const { isIntersecting } = changes[0];
+      if (isIntersecting) {
+        // 加载更多的按钮出现在视口中，也就是触底了
+        try {
+          // console.log(getHomeBasicMoreInfo);
+          const res = await getHomeBasicMoreInfo();
+          const { stories } = res?.data || {};
+
+          newsList.push(stories);
+
+          // console.log('newsList =>', stories, newsList);
+          setNewsList([...newsList]);
+        } catch (e) {
+          return e;
+        }
+      }
+    });
+    const loadMoreBox = loadMore.current;
+    ob.observe(loadMore.current);
+
+    // 在组建销毁释放的时候：手动销毁监听器
+    return () => {
+      ob.unobserve(loadMoreBox); // loadMore.current = null
+      ob = null;
+    };
   }, []);
 
   return (
@@ -162,26 +195,35 @@ const Home = () => {
         </div>
       </div>
       {/* 新闻列表 */}
-      {/* <SkeletonAgain /> */}
-      <div className='news-box'>
-        {newsList.map((item) => {
-          const { date, list, id } = item;
-          return (
-            <div key={id}>
-              <Divider contentPosition='left'>{formatTime(date, '{1}月{2}日')}</Divider>
-              <div className='list'>
-                {list.map((element) => {
-                  const { title, image, name, uid } = element;
-                  return <NewsItem title={title} image={image} name={name} uid={uid} key={uid} />;
-                })}
+      {newsList.length ? (
+        <>
+          {newsList.map((item, index) => {
+            const { date, list, id } = item;
+            return (
+              <div className='news-box' key={id}>
+                {index ? <Divider contentPosition='left'>{formatTime(date, '{1}月{2}日')}</Divider> : null}
+                <div className='list'>
+                  {list.map((element) => {
+                    const { title, image, name, uid } = element;
+                    return <NewsItem title={title} image={image} name={name} uid={uid} key={uid} />;
+                  })}
+                </div>
               </div>
-            </div>
-          );
-        })}
-      </div>
+            );
+          })}
+        </>
+      ) : (
+        <SkeletonAgain />
+      )}
 
       {/* 加载更多 */}
-      <div className='loadmore-box'>
+      <div
+        className='loadmore-box'
+        ref={loadMore}
+        style={{
+          display: newsList.length ? 'block' : 'none',
+        }}
+      >
         <DotLoading />
         <span>数据加载中</span>
       </div>
