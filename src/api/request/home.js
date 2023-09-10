@@ -1,6 +1,7 @@
 import Mockjs, { Random } from 'mockjs';
 import request from '../http';
 
+// 获取基本信息
 Mockjs.mock('/mock/basic/info', 'get', {
   code: 0,
   meg: 'success',
@@ -62,6 +63,27 @@ Mockjs.mock('/mock/basic/more', () => {
   };
 });
 
+Mockjs.mock('/mock/story_extra', () => {
+  return {
+    code: 0,
+    meg: 'success',
+    data: {
+      long_comments: 1,
+      popularity: 183,
+      short_comments: 22,
+      comments: 23,
+    },
+  };
+});
+
+// 获取基本信息
 export const getHomeBasicInfo = () => request.get('/mock/basic/info');
 
+// 获取每天的新闻信息
 export const getHomeBasicMoreInfo = () => request.get('/mock/basic/more');
+
+// 获取详情页信息
+export const getInfoDetail = () => request.get('/api/news/3930883');
+
+// 获取新闻点赞信息
+export const getStoryExtraInfo = () => request.get('/mock/story_extra');

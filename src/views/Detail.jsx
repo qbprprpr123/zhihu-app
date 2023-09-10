@@ -1,6 +1,9 @@
+import { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { LeftOutline, MessageOutline, LikeOutline, StarOutline, MoreOutline } from 'antd-mobile-icons';
 import { Badge } from 'antd-mobile';
+import SkeletonAgain from '@/components/SkeletonAgain';
+import { getInfoDetail, getStoryExtraInfo } from '@/api/request/home';
 
 const DetailBox = styled.div`
   .tab-bar {
@@ -70,24 +73,104 @@ const DetailBox = styled.div`
       }
     }
   }
+
+  .content {
+    .headline {
+      .img-place-holder {
+        height: inherit;
+      }
+
+      img {
+        margin: 0;
+      }
+    }
+    .view-more {
+      padding-bottom: 90px;
+    }
+  }
 `;
+
+let link = null;
 
 const Detail = (props) => {
   const { navigate } = props;
+
+  const [info, setInfo] = useState(null);
+  const [extra, setExtra] = useState(null);
+
+  // 第一次渲染完毕：获取数据
+  const handleStyle = () => {
+    if (!info) return;
+    const css = info?.css?.[0] || '';
+    link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = css;
+    document.head.appendChild(link);
+  };
+  const handleImage = () => {
+    const imgPlaceHolder = document.querySelector('.img-place-holder');
+    if (!imgPlaceHolder) return;
+    // 创建大图并插入到容器
+    const tempImg = new Image();
+    tempImg.src = info.image;
+    tempImg.onload = () => imgPlaceHolder.appendChild(tempImg);
+    tempImg.onerror = () => {
+      const parent = imgPlaceHolder.parentNode;
+      parent.parentNode.removeChild(parent);
+    };
+  };
+
+  // 初始化数据
+  useEffect(() => {
+    try {
+      const getInfoDetailFn = async () => {
+        const res = await getInfoDetail();
+        setInfo(res);
+      };
+
+      getInfoDetailFn();
+    } catch (e) {
+      return e;
+    }
+
+    return () => {
+      if (link) document.head.removeChild(link);
+      link = null;
+    };
+  }, []);
+  useEffect(() => {
+    try {
+      const getStoryExtraInfoFn = async () => {
+        const res = await getStoryExtraInfo();
+        setExtra(res?.data);
+      };
+
+      getStoryExtraInfoFn();
+    } catch (e) {
+      return e;
+    }
+  }, []);
+
+  // 处理样式 & 图片
+  useEffect(() => {
+    handleStyle();
+    handleImage();
+  }, [info]);
+
   return (
     <DetailBox>
       {/* 新闻內容 */}
-      <div className='content'>content</div>
+      {!info ? <SkeletonAgain /> : <div className='content' dangerouslySetInnerHTML={{ __html: info.body }} />}
       {/* 底部图标 */}
       <div className='tab-bar'>
         <div className='back' onClick={() => navigate(-1)}>
           <LeftOutline />
         </div>
         <div className='icons'>
-          <Badge content='128'>
+          <Badge content={extra?.long_comments || 0}>
             <MessageOutline />
           </Badge>
-          <Badge content='29'>
+          <Badge content={extra?.popularity || 0}>
             <LikeOutline />
           </Badge>
           <span className='stored'>

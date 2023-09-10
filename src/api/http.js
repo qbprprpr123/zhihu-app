@@ -2,7 +2,7 @@
  * @intro: http统一封装.
  */
 import axios from 'axios';
-import { isBlobData, isFormData, isFormScheme, judgeCode } from '@/assets/utils';
+import { isFormData, isFormScheme } from '@/assets/utils';
 
 const service = axios.create({
   // 请求根地址
@@ -37,25 +37,27 @@ service.interceptors.response.use(
   (response) => {
     const data = response?.data;
 
-    const rejectResult = () =>
-      // eslint-disable-next-line
-      Promise.reject({
-        ...data,
-        type: 'business',
-      });
+    // const rejectResult = () =>
+    //   // eslint-disable-next-line
+    //   Promise.reject({
+    //     ...data,
+    //     type: 'business',
+    //   });
 
-    // 请求成功
-    if (judgeCode(data?.code)) return data;
-    if (isBlobData(data)) {
-      const fileName = response.headers['content-disposition']?.split('filename=')?.[1];
-      if (fileName) {
-        // 如果有文件名称时就转成file类型，因为file继承blob，并且blob不能设置文件名字
-        return new File([data], decodeURIComponent(fileName), { type: data.type || 'application/octet-stream' });
-      }
-      return data;
-    }
+    // // 请求成功
+    // if (judgeCode(data?.code)) return data;
+    // if (isBlobData(data)) {
+    //   const fileName = response.headers['content-disposition']?.split('filename=')?.[1];
+    //   if (fileName) {
+    //     // 如果有文件名称时就转成file类型，因为file继承blob，并且blob不能设置文件名字
+    //     return new File([data], decodeURIComponent(fileName), { type: data.type || 'application/octet-stream' });
+    //   }
+    //   return data;
+    // }
 
-    return rejectResult();
+    // return rejectResult();
+
+    return data;
   },
   (err) =>
     // eslint-disable-next-line
